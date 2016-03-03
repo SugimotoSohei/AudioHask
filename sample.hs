@@ -2,14 +2,7 @@ module Main where
 
 import WaveHask
 import SoundHask
-import System.Environment(getArgs)
-
 
 main = do
-  --a <- getArgs
-  --f <- fileRead (head a)
-
-  let sound = defaultSound{rate = 44000}
-  fileWrite "new_write.wav" $ newWavData defaultWave{dat = sounds sound,helz = fromIntegral $ rate sound}
-
-  print "OK"
+  let sound = defaultSound{rate = 44100,soundD = zip (repeat 32767) [261.625,293.664,329.627,0]}
+  fileWrite "new_write.wav" $ newWaveData defaultWave{dat = (concat . take 2 . repeat) (sounds sound),helz = fromIntegral $ rate sound}

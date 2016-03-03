@@ -28,8 +28,8 @@ defaultWave = Wave{
   --etc = [] -- 他のチャンクを追加するために使用予定
 }
 
-newWavData :: Wave -> Bl.ByteString
-newWavData wav = Bl.concat [riffC,fmtC,dtC]
+newWaveData :: Wave -> Bl.ByteString
+newWaveData wav = Bl.concat [riffC,fmtC,dtC]
   where
     rawD = Bl.concat (map convI16LE (dat wav))
     raw_fmt = Bl.concat [convW16LE (f_id wav),convW16LE (ch wav),convW32LE (helz wav),convW32LE (fromIntegral (ch wav) * helz wav * fromIntegral (brok wav)),convW16LE (brok wav),convW16LE (8 * brok wav)]
@@ -37,8 +37,8 @@ newWavData wav = Bl.concat [riffC,fmtC,dtC]
     dtC = Bl.concat [convW32BE 0x64617461,convW32LE ((fromIntegral . Bl.length) rawD ),rawD]
     riffC = Bl.concat [convW32BE 0x52494646,convW32LE (4 + (fromIntegral . Bl.length) (Bl.concat [fmtC,dtC]) ),convW32BE 0x57415645]
 
-readWavData :: Bl.ByteString -> Wave
-readWavData bs = Wave{
+readWaveData :: Bl.ByteString -> Wave
+readWaveData bs = Wave{
   f_id = lEndian $ Bl.take 2 fmtc,
   ch   = lEndian $ Bl.take 2 $ Bl.drop 2  fmtc,
   helz = lEndian $ Bl.take 4 $ Bl.drop 4  fmtc,
@@ -78,6 +78,17 @@ lEndian = (le 0) . Bl.unpack
   where le :: Num a => Int -> [Word8] -> a
         le _ [] = 0
         le n (x:xs) = (fromIntegral x) * (256 ^ n) + le (n+1) xs
+
+wavesData :: [Wave] -> [Int16]
+wavesData = concat . map dat
+
+readWaveFiles :: [FilePath] -> IO Wave
+readWaveFiles ss = (mapM fileRead ss) >>= (\x -> return (head x){dat = wavesData x}) . map readWaveData
+
+writeTextFile :: FilePath -> Wave -> IO ()
+writeTextFile s= writeFile s . show . dat
+
+readTextFile = readFile
 
 -- ラッパ関数
 fileRead = Bl.readFile

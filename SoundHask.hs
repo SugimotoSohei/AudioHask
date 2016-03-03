@@ -11,7 +11,7 @@ import Data.Int
 data Sound = Sound {
   rate :: Int   ,
   second :: Int ,
-  soundD :: [(Int,Float)]
+  soundD :: [(Int,Rational)]
 }
 
 defaultSound :: Sound
@@ -26,12 +26,12 @@ sounds sou = map (fromIntegral . fromEnum) . concat . map (\(x,y) -> (func3 (rat
   where nn = length (soundD sou)
 
 -- 離散値?を求める
-func1 :: Int -> Float -> [Float]
+func1 :: Int -> Rational -> [Rational]
 func1 r d = [0,(d / fromIntegral r)..1.0-(d / fromIntegral r)]
 
 -- 波形?を求める
-func2 :: Int -> [Float] -> [Float]
-func2 i = map ((fromIntegral i *) . sin)
+func2 :: Int -> [Rational] -> [Float]
+func2 i = map ((fromIntegral i *) . sin . fromRational)
 
 -- 繰り返しを生成する
 func3 :: Int -> Int -> Int -> [Float] -> [Float]
